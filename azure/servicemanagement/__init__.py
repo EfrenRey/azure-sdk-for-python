@@ -2603,6 +2603,19 @@ class _XmlSerializer(object):
             xml += '</ExtendedProperties>'
         return xml
 
+    @staticmethod
+    def _settings_database_to_xml(database_name, edition, max_size_bytes,
+                                  service_objective_id, collation_name):
+        xml = '<ServiceResource xmlns="http://schemas.microsoft.com/windowsazure">'
+        xml += _XmlSerializer.data_to_xml(
+            [('Name', database_name),
+             ('Edition', edition),
+             ('CollationName', collation_name),
+             ('MaxSizeBytes', max_size_bytes),
+             ('ServiceObjectiveId', service_objective_id)])
+        xml += '</ServiceResource>'
+        return xml
+
 
 def _parse_bool(value):
     if value.lower() == 'true':

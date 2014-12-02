@@ -19,6 +19,7 @@ from azure import (
 from azure.servicemanagement import (
     Servers,
     Database,
+    _XmlSerializer,
     )
 from azure.servicemanagement.servicemanagementclient import (
     _ServiceManagementClient,
@@ -73,6 +74,23 @@ class SqlDatabaseManagementService(_ServiceManagementClient):
                                      None)
         return _parse_service_resources_response(response, Database)
 
+    def create_database(self, server_name, database_name, edition, max_size_bytes,
+                        service_objective_id,
+                        collation_name='SQL_Latin1_General_CP1_CI_AS'):
+        '''
+        Creates a database in a server.
+        '''
+        xml_data = _XmlSerializer._settings_database_to_xml(database_name, edition, max_size_bytes,
+                                                            service_objective_id, collation_name)
+        return _perform_sql_post(self._get_database_path(server_name),
+                                 xml_data,
+                                 Database)
+
+    def delete_database(self, server_name, database_name):
+        '''
+        Deletes a database from a server.
+        '''
+        return _perform_delete(self._get_database_path(server_name, database_name))
 
     #--Helper functions --------------------------------------------------
     def _get_list_servers_path(self):
@@ -82,4 +100,7 @@ class SqlDatabaseManagementService(_ServiceManagementClient):
         # *contentview=generic is mandatory*
         return self._get_path('services/sqlservers/servers/',
                               name) + '/databases?contentview=generic' 
-    
+
+    def _get_database_path(self, server_name, database_name=None):
+        return self._get_path('services/sqlservers/servers/' + server_name + '/databases',
+                              database_name)
